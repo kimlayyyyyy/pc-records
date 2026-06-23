@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Users — PC Record</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.page-header {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.page-title { font-size: 18px; font-weight: 700; }
+.page-sub   { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+
+.users-wrap {
+  max-width: 900px;
+  margin: 20px auto 60px;
+  padding: 0 24px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.card-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── User table ── */
+.user-table { width: 100%; border-collapse: collapse; }
+.user-table th {
+  padding: 10px 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.user-table td {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+.user-table tr:last-child td { border-bottom: none; }
+.user-table tbody tr:hover { background: var(--surface-2); }
+
+.u-name { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.u-self { color: var(--accent); }
+
+.role-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.role-admin  { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(79,142,247,.2); }
+.role-viewer { background: var(--tape-dim);   color: var(--tape);   border: 1px solid rgba(245,158,11,.2); }
+
+[data-theme="light"] .role-admin  { background: #dbeafe; color: #1d4ed8; }
+[data-theme="light"] .role-viewer { background: #fef3c7; color: #92400e; }
+
+.u-date { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+.u-never { color: var(--text-muted); font-style: italic; }
+
+.row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.icon-btn {
+  width: 30px; height: 30px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.icon-btn.danger:hover { border-color: rgba(240,82,82,.5); color: var(--rec); background: var(--rec-dim); }
+.icon-btn svg { width: 13px; height: 13px; }
+
+/* ── Add user form ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 20px;
+}
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.form-field input, .form-field select {
+  height: 38px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 0 12px;
+  width: 100%;
+  transition: border-color .15s;
+  appearance: none;
+  min-width: 0;
+}
+.form-field input:focus, .form-field select:focus {
+  outline: none; border-color: var(--accent);
+}
+.form-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%236b7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+.form-footer {
+  padding: 0 20px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.form-msg {
+  font-family: var(--mono);
+  font-size: 11px;
+  flex: 1;
+}
+.form-msg.ok  { color: #34d399; }
+.form-msg.err { color: var(--rec); }
+
+.btn-primary {
+  height: 38px; padding: 0 20px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+  white-space: nowrap;
+}
+.btn-primary:hover { opacity: .88; }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.6); z-index: 200;
+  align-items: center; justify-content: center; padding: 24px;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-lg);
+  width: 100%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.4);
+}
+.modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-title { font-size: 14px; font-weight: 600; }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+}
+.btn-ghost {
+  height: 36px; padding: 0 16px;
+  background: transparent; color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: 13px; cursor: pointer; transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
+.btn-danger {
+  height: 36px; padding: 0 16px;
+  background: var(--rec); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s;
+}
+.btn-danger:hover { opacity: .88; }
+
+.empty-users {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36" class="brand-logo-svg">
+        <line x1="18" y1="6"  x2="6"  y2="24" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="18" y1="6"  x2="30" y2="24" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="6"  y1="24" x2="30" y2="24" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+        <line x1="18" y1="6"  x2="18" y2="24" stroke="var(--accent)" stroke-width="1.5" opacity="0.3"/>
+        <line x1="6"  y1="24" x2="18" y2="16" stroke="var(--accent)" stroke-width="1.5" opacity="0.3"/>
+        <line x1="30" y1="24" x2="18" y2="16" stroke="var(--accent)" stroke-width="1.5" opacity="0.3"/>
+        <circle cx="18" cy="16" r="2.5" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="18" cy="6"  r="3.5" fill="var(--accent)"/>
+        <circle cx="6"  cy="24" r="3.5" fill="var(--accent)"/>
+        <circle cx="30" cy="24" r="3.5" fill="var(--accent)"/>
+        <circle cx="18" cy="6"  r="1.5" fill="var(--surface)"/>
+        <circle cx="6"  cy="24" r="1.5" fill="var(--surface)"/>
+        <circle cx="30" cy="24" r="1.5" fill="var(--surface)"/>
+      </svg>
+      <div class="brand-text">
+        <span class="brand-name">PC Records</span>
+        <span class="brand-sub">User Management</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbarUser"></span>
+      <a href="/" class="theme-toggle" title="Back to recordings" style="text-decoration:none">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg id="icon-moon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+        <svg id="icon-sun"  viewBox="0 0 20 20" fill="currentColor" width="16" height="16" style="display:none"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.706a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+      </button>
+      <button class="logout-btn" id="logoutBtn" title="Sign out">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M13 3h4a1 1 0 011 1v12a1 1 0 01-1 1h-4"/><polyline points="10 15 14 10 10 5"/><line x1="14" y1="10" x2="3" y2="10"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">Users</div>
+    <div class="page-sub">Manage who can access PC Records</div>
+  </div>
+</div>
+
+<div class="users-wrap">
+
+  <!-- User list -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">All Users</span>
+      <span class="file-count" id="userCount"></span>
+    </div>
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Last Login</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <tr><td colspan="5" class="empty-users">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add user form -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Add New User</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Username</label>
+        <input type="text" id="newUsername" placeholder="e.g. john" autocomplete="off">
+      </div>
+      <div class="form-field">
+        <label>Password</label>
+        <input type="password" id="newPassword" placeholder="Min. 6 characters">
+      </div>
+      <div class="form-field">
+        <label>Role</label>
+        <select id="newRole">
+          <option value="viewer">Viewer — can only watch recordings</option>
+          <option value="admin">Admin — full access + user management</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-footer">
+      <span class="form-msg" id="addMsg"></span>
+      <button class="btn-primary" id="addUserBtn">Add User</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Edit / Change Password Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Change Password</span>
+      <button class="close-btn" id="closeEditModal">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M1 1l12 12M13 1L1 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editUserId">
+      <div class="form-field">
+        <label>Username</label>
+        <input type="text" id="editUsername" disabled style="opacity:.5">
+      </div>
+      <div class="form-field">
+        <label>New Password</label>
+        <input type="password" id="editPassword" placeholder="Min. 6 characters">
+      </div>
+      <div class="form-field">
+        <label>Role</label>
+        <select id="editRole">
+          <option value="viewer">Viewer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <span class="form-msg" id="editMsg"></span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="cancelEdit">Cancel</button>
+      <button class="btn-primary" id="saveEdit">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Delete User</span>
+      <button class="close-btn" id="closeDeleteModal">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M1 1l12 12M13 1L1 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
+        Are you sure you want to delete <strong id="deleteUsername" style="color:var(--text)"></strong>?<br>This cannot be undone.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="cancelDelete">Cancel</button>
+      <button class="btn-danger" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">Developed by <span class="footer-name">Kim Lay</span></footer>
+
+<script>
+// ── Theme ──
+const html = document.documentElement;
+const saved = localStorage.getItem('theme') || 'dark';
+html.dataset.theme = saved;
+const moon = document.getElementById('icon-moon');
+const sun  = document.getElementById('icon-sun');
+if (saved === 'light') { moon.style.display = 'none'; sun.style.display = ''; }
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next; localStorage.setItem('theme', next);
+  moon.style.display = next === 'dark' ? '' : 'none';
+  sun.style.display  = next === 'light' ? '' : 'none';
+});
+
+// ── Session ──
+let currentUser = null;
+fetch('/api/auth/me').then(r => {
+  if (!r.ok) { window.location.href = '/login.html'; return null; }
+  return r.json();
+}).then(d => {
+  if (!d) return;
+  if (d.role !== 'admin') { window.location.href = '/'; return; }
+  currentUser = d;
+  document.getElementById('topbarUser').textContent = d.username;
+  loadUsers();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login.html';
+});
+
+// ── Format date ──
+function fmtDate(d) {
+  if (!d) return '<span class="u-never">Never</span>';
+  return new Date(d).toLocaleString();
+}
+
+// ── Load users ──
+async function loadUsers() {
+  const res = await fetch('/api/auth/users');
+  if (!res.ok) return;
+  const users = await res.json();
+  document.getElementById('userCount').textContent = `${users.length} user${users.length === 1 ? '' : 's'}`;
+  const tbody = document.getElementById('userTableBody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-users">No users found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td><span class="u-name ${u.id === currentUser.id ? 'u-self' : ''}">${u.username}${u.id === currentUser.id ? ' (you)' : ''}</span></td>
+      <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+      <td class="u-date">${fmtDate(u.last_login)}</td>
+      <td class="u-date">${fmtDate(u.created_at)}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" onclick="openEdit(${u.id},'${u.username}','${u.role}')" title="Edit">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5l2 2L6 12H4v-2L11.5 2.5z"/></svg>
+          </button>
+          ${u.id !== currentUser.id ? `
+          <button class="icon-btn danger" onclick="openDelete(${u.id},'${u.username}')" title="Delete">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 4 14 4"/><path d="M5 4V2h6v2"/><path d="M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+          </button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Add user ──
+document.getElementById('addUserBtn').addEventListener('click', async () => {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const role     = document.getElementById('newRole').value;
+  const msg      = document.getElementById('addMsg');
+  msg.className  = 'form-msg';
+  msg.textContent = '';
+  if (!username || !password) { msg.className = 'form-msg err'; msg.textContent = 'Username and password are required.'; return; }
+  const btn = document.getElementById('addUserBtn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  const res = await fetch('/api/auth/users', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password, role })
+  });
+  const data = await res.json();
+  btn.disabled = false; btn.textContent = 'Add User';
+  if (res.ok) {
+    msg.className = 'form-msg ok'; msg.textContent = `✓ User '${username}' created successfully.`;
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+    loadUsers();
+  } else {
+    msg.className = 'form-msg err'; msg.textContent = data.error || 'Failed to create user.';
+  }
+});
+
+// ── Edit modal ──
+function openEdit(id, username, role) {
+  document.getElementById('editUserId').value   = id;
+  document.getElementById('editUsername').value = username;
+  document.getElementById('editRole').value     = role;
+  document.getElementById('editPassword').value = '';
+  document.getElementById('editMsg').textContent = '';
+  document.getElementById('editMsg').className   = 'form-msg';
+  document.getElementById('editModal').classList.add('active');
+}
+
+document.getElementById('closeEditModal').addEventListener('click', () => document.getElementById('editModal').classList.remove('active'));
+document.getElementById('cancelEdit').addEventListener('click', () => document.getElementById('editModal').classList.remove('active'));
+
+document.getElementById('saveEdit').addEventListener('click', async () => {
+  const id       = document.getElementById('editUserId').value;
+  const password = document.getElementById('editPassword').value;
+  const role     = document.getElementById('editRole').value;
+  const msg      = document.getElementById('editMsg');
+  msg.className  = 'form-msg'; msg.textContent = '';
+  const btn      = document.getElementById('saveEdit');
+  btn.disabled   = true; btn.textContent = 'Saving…';
+  const res = await fetch(`/api/auth/users/${id}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: password || undefined, role })
+  });
+  const data = await res.json();
+  btn.disabled = false; btn.textContent = 'Save Changes';
+  if (res.ok) {
+    msg.className = 'form-msg ok'; msg.textContent = '✓ Updated.';
+    loadUsers();
+    setTimeout(() => document.getElementById('editModal').classList.remove('active'), 800);
+  } else {
+    msg.className = 'form-msg err'; msg.textContent = data.error || 'Update failed.';
+  }
+});
+
+// ── Delete modal ──
+let pendingDeleteId = null;
+function openDelete(id, username) {
+  pendingDeleteId = id;
+  document.getElementById('deleteUsername').textContent = username;
+  document.getElementById('deleteModal').classList.add('active');
+}
+document.getElementById('closeDeleteModal').addEventListener('click', () => document.getElementById('deleteModal').classList.remove('active'));
+document.getElementById('cancelDelete').addEventListener('click', () => document.getElementById('deleteModal').classList.remove('active'));
+document.getElementById('confirmDelete').addEventListener('click', async () => {
+  if (!pendingDeleteId) return;
+  const btn = document.getElementById('confirmDelete');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  const res = await fetch(`/api/auth/users/${pendingDeleteId}`, { method: 'DELETE' });
+  btn.disabled = false; btn.textContent = 'Delete';
+  document.getElementById('deleteModal').classList.remove('active');
+  if (res.ok) loadUsers();
+});
+
+// Close modals on backdrop click
+['editModal','deleteModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('active');
+  });
+});
+</script>
+</body>
+</html>

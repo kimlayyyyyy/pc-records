@@ -1,0 +1,72 @@
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: recordings-redis
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mysql:
+    image: mysql:8.0
+    container_name: recordings-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: stationtapes
+      MYSQL_USER: stuser
+      MYSQL_PASSWORD: stpass123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "stuser", "-pstpass123"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+
+  recordings-ui:
+    build: .
+    container_name: recordings-ui
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: stationtapes
+      DB_USER: stuser
+      DB_PASS: stpass123
+      SESSION_SECRET: change-this-to-a-long-random-string
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - /srv/recordings/PC01:/var/www/html/videos/PC01
+      - /srv/recordings/PC02:/var/www/html/videos/PC02
+      - /srv/recordings/PC03:/var/www/html/videos/PC03
+      - /srv/recordings/PC04:/var/www/html/videos/PC04
+      - /srv/recordings/PC05:/var/www/html/videos/PC05
+      - /srv/recordings/PC06:/var/www/html/videos/PC06
+      - /srv/recordings/PC07:/var/www/html/videos/PC07
+      - /srv/recordings/PC08:/var/www/html/videos/PC08
+      - /srv/recordings/PC09:/var/www/html/videos/PC09
+      - /srv/recordings/PC10:/var/www/html/videos/PC10
+      - /srv/recordings/PC11:/var/www/html/videos/PC11
+      - /srv/recordings/PC12:/var/www/html/videos/PC12
+      - /srv/recordings/PC13:/var/www/html/videos/PC13
+      - /srv/recordings/PC14:/var/www/html/videos/PC14
+      - /srv/recordings/PC15:/var/www/html/videos/PC15
+
+volumes:
+  mysql_data:

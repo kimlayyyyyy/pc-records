@@ -1,0 +1,228 @@
+# ============================================================
+# Reference Samba config for hosting 15 OBS recording shares
+# on the Ubuntu server. Append the [global] tweaks and the
+# [PC01]-[PC15] blocks below to /etc/samba/smb.conf, then:
+#
+#   sudo testparm
+#   sudo systemctl restart smbd nmbd
+#   sudo ufw allow samba
+#
+# Folders expected at /srv/recordings/PC01 .. PC15
+# (create with: sudo mkdir -p /srv/recordings/PC{01..15}
+#               sudo chown -R nobody:nogroup /srv/recordings
+#               sudo chmod -R 0775 /srv/recordings)
+#
+# ============================================================
+# IP WHITELIST — each PC may only write to its own share.
+# Update the IPs below to match your actual network.
+# Recommended: assign static IPs (or DHCP reservations) so
+# these addresses never change.
+#
+#   PC01 (BAC01) → 192.168.1.101
+#   PC02 (BAC02) → 192.168.1.102
+#   PC03 (BAC03) → 192.168.1.103
+#   PC04 (BAC05) → 192.168.1.104
+#   PC05 (BAC06) → 192.168.1.105
+#   PC06 (BAC07) → 192.168.1.106
+#   PC07 (BAC08) → 192.168.1.107
+#   PC08 (BAC09) → 192.168.1.108
+#   PC09 (DT01)  → 192.168.1.109
+#   PC10 (MJ01)  → 192.168.1.110
+#   PC11 (BN01)  → 192.168.1.111
+#   PC12 (SD01)  → 192.168.1.112
+#   PC13 (SB01)  → 192.168.1.113
+#   PC14 (3K01)  → 192.168.1.114
+#   PC15 (RL01)  → 192.168.1.115
+#
+# SERVER_IP     → IP of this Ubuntu server (for localhost allow)
+# ============================================================
+
+[global]
+   workgroup = WORKGROUP
+   map to guest = bad user
+   server min protocol = SMB2
+   usershare allow guests = yes
+   # Deny everyone by default; each share opens only its own PC
+   hosts deny = ALL
+   # Allow the server itself (loopback) globally
+   hosts allow = 127.0.0.1
+
+# ── BAC01 — PC01 ─────────────────────────────────────────────
+[PC01]
+   path = /srv/recordings/PC01
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.101
+   hosts deny = ALL
+
+# ── BAC02 — PC02 ─────────────────────────────────────────────
+[PC02]
+   path = /srv/recordings/PC02
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.102
+   hosts deny = ALL
+
+# ── BAC03 — PC03 ─────────────────────────────────────────────
+[PC03]
+   path = /srv/recordings/PC03
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.103
+   hosts deny = ALL
+
+# ── BAC05 — PC04 ─────────────────────────────────────────────
+[PC04]
+   path = /srv/recordings/PC04
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.104
+   hosts deny = ALL
+
+# ── BAC06 — PC05 ─────────────────────────────────────────────
+[PC05]
+   path = /srv/recordings/PC05
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.105
+   hosts deny = ALL
+
+# ── BAC07 — PC06 ─────────────────────────────────────────────
+[PC06]
+   path = /srv/recordings/PC06
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.106
+   hosts deny = ALL
+
+# ── BAC08 — PC07 ─────────────────────────────────────────────
+[PC07]
+   path = /srv/recordings/PC07
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.107
+   hosts deny = ALL
+
+# ── BAC09 — PC08 ─────────────────────────────────────────────
+[PC08]
+   path = /srv/recordings/PC08
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.108
+   hosts deny = ALL
+
+# ── DT01 — PC09 ──────────────────────────────────────────────
+[PC09]
+   path = /srv/recordings/PC09
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.109
+   hosts deny = ALL
+
+# ── MJ01 — PC10 ──────────────────────────────────────────────
+[PC10]
+   path = /srv/recordings/PC10
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.110
+   hosts deny = ALL
+
+# ── BN01 — PC11 ──────────────────────────────────────────────
+[PC11]
+   path = /srv/recordings/PC11
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.111
+   hosts deny = ALL
+
+# ── SD01 — PC12 ──────────────────────────────────────────────
+[PC12]
+   path = /srv/recordings/PC12
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.112
+   hosts deny = ALL
+
+# ── SB01 — PC13 ──────────────────────────────────────────────
+[PC13]
+   path = /srv/recordings/PC13
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.113
+   hosts deny = ALL
+
+# ── 3K01 — PC14 ──────────────────────────────────────────────
+[PC14]
+   path = /srv/recordings/PC14
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.114
+   hosts deny = ALL
+
+# ── RL01 — PC15 ──────────────────────────────────────────────
+[PC15]
+   path = /srv/recordings/PC15
+   browsable = yes
+   read only = no
+   guest ok = yes
+   force user = nobody
+   create mask = 0664
+   directory mask = 0775
+   hosts allow = 127.0.0.1 192.168.1.115
+   hosts deny = ALL
